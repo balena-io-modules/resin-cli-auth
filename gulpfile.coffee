@@ -4,6 +4,8 @@ mocha = require('gulp-mocha')
 gutil = require('gulp-util')
 coffeelint = require('gulp-coffeelint')
 coffee = require('gulp-coffee')
+inlinesource = require('gulp-inline-source')
+runSequence = require('gulp-run-sequence')
 
 OPTIONS =
 	config:
@@ -12,6 +14,12 @@ OPTIONS =
 		coffee: [ 'lib/**/*.coffee', 'tests/**/*.spec.coffee', 'gulpfile.coffee' ]
 		app: 'lib/**/*.coffee'
 		tests: 'tests/**/*.spec.coffee'
+		pages: 'pages/*.html'
+
+gulp.task 'pages', ->
+	gulp.src(OPTIONS.files.pages)
+		.pipe(inlinesource())
+		.pipe(gulp.dest('build/pages'))
 
 gulp.task 'coffee', ->
 	gulp.src(OPTIONS.files.app)
@@ -31,11 +39,13 @@ gulp.task 'lint', ->
 		}))
 		.pipe(coffeelint.reporter())
 
-gulp.task 'build', [
-	'lint'
-	'test'
-	'coffee'
-]
+gulp.task 'build', (callback) ->
+	runSequence 'pages', [
+		'lint'
+		'test'
+		'coffee'
+	], callback
 
 gulp.task 'watch', [ 'build' ], ->
 	gulp.watch(OPTIONS.files.coffee, [ 'build' ])
+	gulp.watch(OPTIONS.files.pages, [ 'pages' ])

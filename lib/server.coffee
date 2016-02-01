@@ -21,7 +21,7 @@ Promise = require('bluebird')
 utils = require('./utils')
 
 getPagePath = (name) ->
-	return path.join(__dirname, '..', 'pages', "#{name}.html")
+	return path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
 
 ###*
 # @summary Await for token
