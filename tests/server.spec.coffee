@@ -12,7 +12,7 @@ options =
 	path: '/auth'
 
 getPage = (name) ->
-	pagePath = path.join(__dirname, '..', 'pages', "#{name}.html")
+	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
 	return fs.readFileSync(pagePath, encoding: 'utf8')
 
 describe 'Server:', ->

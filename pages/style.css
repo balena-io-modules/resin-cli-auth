@@ -24,21 +24,10 @@ body {
 
 .icon {
 	display: block;
-	width: 45px;
+	width: 40px;
 	height: 45px;
 	margin: 0 auto;
 	margin-bottom: 15px;
-	background-position: center;
-	background-size: contain;
-	background-repeat: no-repeat;
-}
-
-.icon.happy {
-	background-image: url("./images/happy.png");
-}
-
-.icon.sad {
-	background-image: url("./images/sad.png");
 }
 
 h1 {
