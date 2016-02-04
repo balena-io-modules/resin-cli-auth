@@ -69,7 +69,7 @@ exports.awaitForToken = function(options) {
     cert: fs.readFileSync(getCertPath('cert.pem'))
   }, app).listen(options.port);
   return new Promise(function(resolve, reject) {
-    app.post(options.path, function(request, response) {
+    app.all(options.path, function(request, response) {
       var token;
       token = request.body.token;
       return utils.isTokenValid(token).then(function(isValid) {

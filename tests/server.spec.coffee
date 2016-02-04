@@ -35,19 +35,6 @@ describe 'Server:', ->
 			m.chai.expect(body).to.equal('Not found')
 			done()
 
-	it 'should get 404 if not using the correct verb', (done) ->
-		promise = server.awaitForToken(options)
-		m.chai.expect(promise).to.be.rejectedWith('No token')
-
-		unsafeRequest.get "https://localhost:#{options.port}#{options.path}",
-			form:
-				token: tokens.johndoe.token
-		, (error, response, body) ->
-			m.chai.expect(error).to.not.exist
-			m.chai.expect(response.statusCode).to.equal(404)
-			m.chai.expect(body).to.equal('Not found')
-			done()
-
 	describe 'given the token authenticates with the server', ->
 
 		beforeEach ->
@@ -62,6 +49,19 @@ describe 'Server:', ->
 			m.chai.expect(promise).to.eventually.equal(tokens.johndoe.token)
 
 			unsafeRequest.post "https://localhost:#{options.port}#{options.path}",
+				form:
+					token: tokens.johndoe.token
+			, (error, response, body) ->
+				m.chai.expect(error).to.not.exist
+				m.chai.expect(response.statusCode).to.equal(200)
+				m.chai.expect(body).to.equal(getPage('success'))
+				done()
+
+		it 'should eventually be the token given any HTTP verb', (done) ->
+			promise = server.awaitForToken(options)
+			m.chai.expect(promise).to.eventually.equal(tokens.johndoe.token)
+
+			unsafeRequest.get "https://localhost:#{options.port}#{options.path}",
 				form:
 					token: tokens.johndoe.token
 			, (error, response, body) ->

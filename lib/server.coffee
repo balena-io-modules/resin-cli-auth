@@ -59,7 +59,7 @@ exports.awaitForToken = (options) ->
 	}, app).listen(options.port)
 
 	return new Promise (resolve, reject) ->
-		app.post options.path, (request, response) ->
+		app.all options.path, (request, response) ->
 			token = request.body.token
 
 			utils.isTokenValid(token)
