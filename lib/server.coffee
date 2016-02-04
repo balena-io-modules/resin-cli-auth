@@ -18,10 +18,17 @@ express = require('express')
 path = require('path')
 bodyParser = require('body-parser')
 Promise = require('bluebird')
+https = require('https')
+fs = require('fs')
 utils = require('./utils')
+
+CONNECTION_CLOSE_DELAY = 200
 
 getPagePath = (name) ->
 	return path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
+
+getCertPath = (file) ->
+	return path.join(__dirname, '..', 'certs', file)
 
 ###*
 # @summary Await for token
@@ -44,7 +51,12 @@ exports.awaitForToken = (options) ->
 	app.use bodyParser.urlencoded
 		extended: true
 
-	server = app.listen(options.port)
+	# Use self-signed certificate to avoid "unsafe form"
+	# errors in some web browsers.
+	server = https.createServer({
+		key: fs.readFileSync(getCertPath('key.pem'))
+		cert: fs.readFileSync(getCertPath('cert.pem'))
+	}, app).listen(options.port)
 
 	return new Promise (resolve, reject) ->
 		app.post options.path, (request, response) ->
@@ -54,16 +66,20 @@ exports.awaitForToken = (options) ->
 			.then (isValid) ->
 				if isValid
 					return response.status(200).sendFile getPagePath('success'), ->
-						request.connection.destroy()
-						server.close ->
-							return resolve(token)
+						setTimeout ->
+							request.connection.destroy()
+							server.close ->
+								return resolve(token)
+						, CONNECTION_CLOSE_DELAY
 
 				throw new Error('No token')
 			.catch (error) ->
 				response.status(401).sendFile getPagePath('error'), ->
-					request.connection.destroy()
-					server.close ->
-						return reject(new Error(error.message))
+					setTimeout ->
+						request.connection.destroy()
+						server.close ->
+							return reject(new Error(error.message))
+					, CONNECTION_CLOSE_DELAY
 
 		app.use (request, response) ->
 			response.status(404).send('Not found')

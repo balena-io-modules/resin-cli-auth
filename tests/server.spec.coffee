@@ -11,6 +11,11 @@ options =
 	port: 3000
 	path: '/auth'
 
+# Prevent complaints about self signed certificate
+# https://github.com/request/request/issues/418
+unsafeRequest = request.defaults
+	rejectUnauthorized: false
+
 getPage = (name) ->
 	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
 	return fs.readFileSync(pagePath, encoding: 'utf8')
@@ -21,7 +26,7 @@ describe 'Server:', ->
 		promise = server.awaitForToken(options)
 		m.chai.expect(promise).to.be.rejectedWith('No token')
 
-		request.post "http://localhost:#{options.port}/foobarbaz",
+		unsafeRequest.post "https://localhost:#{options.port}/foobarbaz",
 			form:
 				token: tokens.johndoe.token
 		, (error, response, body) ->
@@ -34,7 +39,7 @@ describe 'Server:', ->
 		promise = server.awaitForToken(options)
 		m.chai.expect(promise).to.be.rejectedWith('No token')
 
-		request.get "http://localhost:#{options.port}#{options.path}",
+		unsafeRequest.get "https://localhost:#{options.port}#{options.path}",
 			form:
 				token: tokens.johndoe.token
 		, (error, response, body) ->
@@ -56,7 +61,7 @@ describe 'Server:', ->
 			promise = server.awaitForToken(options)
 			m.chai.expect(promise).to.eventually.equal(tokens.johndoe.token)
 
-			request.post "http://localhost:#{options.port}#{options.path}",
+			unsafeRequest.post "https://localhost:#{options.port}#{options.path}",
 				form:
 					token: tokens.johndoe.token
 			, (error, response, body) ->
@@ -78,7 +83,7 @@ describe 'Server:', ->
 			promise = server.awaitForToken(options)
 			m.chai.expect(promise).to.be.rejectedWith('No token')
 
-			request.post "http://localhost:#{options.port}#{options.path}",
+			unsafeRequest.post "https://localhost:#{options.port}#{options.path}",
 				form:
 					token: tokens.johndoe.token
 			, (error, response, body) ->
@@ -91,7 +96,7 @@ describe 'Server:', ->
 			promise = server.awaitForToken(options)
 			m.chai.expect(promise).to.be.rejectedWith('No token')
 
-			request.post "http://localhost:#{options.port}#{options.path}",
+			unsafeRequest.post "https://localhost:#{options.port}#{options.path}",
 				form:
 					token: ''
 			, (error, response, body) ->
@@ -104,7 +109,7 @@ describe 'Server:', ->
 			promise = server.awaitForToken(options)
 			m.chai.expect(promise).to.be.rejectedWith('No token')
 
-			request.post "http://localhost:#{options.port}#{options.path}",
+			unsafeRequest.post "https://localhost:#{options.port}#{options.path}",
 				form:
 					token: 'asdf'
 			, (error, response, body) ->

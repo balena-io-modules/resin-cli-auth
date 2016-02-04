@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, bodyParser, express, getPagePath, path, utils;
+var CONNECTION_CLOSE_DELAY, Promise, bodyParser, express, fs, getCertPath, getPagePath, https, path, utils;
 
 express = require('express');
 
@@ -24,10 +24,20 @@ bodyParser = require('body-parser');
 
 Promise = require('bluebird');
 
+https = require('https');
+
+fs = require('fs');
+
 utils = require('./utils');
+
+CONNECTION_CLOSE_DELAY = 200;
 
 getPagePath = function(name) {
   return path.join(__dirname, '..', 'build', 'pages', "" + name + ".html");
+};
+
+getCertPath = function(file) {
+  return path.join(__dirname, '..', 'certs', file);
 };
 
 
@@ -54,7 +64,10 @@ exports.awaitForToken = function(options) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
-  server = app.listen(options.port);
+  server = https.createServer({
+    key: fs.readFileSync(getCertPath('key.pem')),
+    cert: fs.readFileSync(getCertPath('cert.pem'))
+  }, app).listen(options.port);
   return new Promise(function(resolve, reject) {
     app.post(options.path, function(request, response) {
       var token;
@@ -62,19 +75,23 @@ exports.awaitForToken = function(options) {
       return utils.isTokenValid(token).then(function(isValid) {
         if (isValid) {
           return response.status(200).sendFile(getPagePath('success'), function() {
-            request.connection.destroy();
-            return server.close(function() {
-              return resolve(token);
-            });
+            return setTimeout(function() {
+              request.connection.destroy();
+              return server.close(function() {
+                return resolve(token);
+              });
+            }, CONNECTION_CLOSE_DELAY);
           });
         }
         throw new Error('No token');
       })["catch"](function(error) {
         return response.status(401).sendFile(getPagePath('error'), function() {
-          request.connection.destroy();
-          return server.close(function() {
-            return reject(new Error(error.message));
-          });
+          return setTimeout(function() {
+            request.connection.destroy();
+            return server.close(function() {
+              return reject(new Error(error.message));
+            });
+          }, CONNECTION_CLOSE_DELAY);
         });
       });
     });
