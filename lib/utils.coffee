@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ###
 
-resin = require('resin-sdk')
+resin = require('resin-sdk-preconfigured')
 token = require('resin-token')
 _ = require('lodash')
 _.str = require('underscore.string')
