@@ -19,7 +19,7 @@ limitations under the License.
 ###
 
 open = require('open')
-resin = require('resin-sdk')
+resin = require('resin-sdk-preconfigured')
 server = require('./server')
 utils = require('./utils')
 

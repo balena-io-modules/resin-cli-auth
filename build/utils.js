@@ -16,7 +16,7 @@ limitations under the License.
  */
 var Promise, resin, token, url, _;
 
-resin = require('resin-sdk');
+resin = require('resin-sdk-preconfigured');
 
 token = require('resin-token');
 
