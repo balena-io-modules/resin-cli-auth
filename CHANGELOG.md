@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.3] - 2017-04-07
+
 - Use resin-token from the SDK instance, rather than managing it ourselves
 
 ## [1.1.2] - 2017-01-24
@@ -30,6 +32,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Omit tests from NPM package.
 
+[1.1.3]: https://github.com/resin-io/resin-cli-auth/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/resin-io/resin-cli-auth/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/resin-io/resin-cli-auth/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/resin-io/resin-cli-auth/compare/v1.0.1...v1.1.0
