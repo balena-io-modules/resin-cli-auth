@@ -14,11 +14,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, resin, token, url, _;
+var Promise, resin, url, _;
 
 resin = require('resin-sdk-preconfigured');
-
-token = require('resin-token');
 
 _ = require('lodash');
 
@@ -73,7 +71,7 @@ exports.isTokenValid = function(sessionToken) {
   if ((sessionToken == null) || _.str.isBlank(sessionToken)) {
     return Promise.resolve(false);
   }
-  return token.get().then(function(currentToken) {
+  return resin.token.get().then(function(currentToken) {
     return resin.auth.loginWithToken(sessionToken)["return"](sessionToken).then(resin.auth.isLoggedIn).tap(function(isLoggedIn) {
       if (isLoggedIn) {
         return;
