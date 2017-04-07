@@ -43,8 +43,7 @@
     "express": "^4.13.3",
     "lodash": "^3.10.1",
     "open": "0.0.5",
-    "resin-sdk-preconfigured": "^0.1.0",
-    "resin-token": "^2.4.2",
+    "resin-sdk-preconfigured": "^6.0.0",
     "underscore.string": "^3.2.2"
   }
 }

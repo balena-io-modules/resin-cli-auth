@@ -15,7 +15,6 @@ limitations under the License.
 ###
 
 resin = require('resin-sdk-preconfigured')
-token = require('resin-token')
 _ = require('lodash')
 _.str = require('underscore.string')
 url = require('url')
@@ -64,7 +63,7 @@ exports.isTokenValid = (sessionToken) ->
 	if not sessionToken? or _.str.isBlank(sessionToken)
 		return Promise.resolve(false)
 
-	return token.get().then (currentToken) ->
+	return resin.token.get().then (currentToken) ->
 		resin.auth.loginWithToken(sessionToken)
 			.return(sessionToken)
 			.then(resin.auth.isLoggedIn)
