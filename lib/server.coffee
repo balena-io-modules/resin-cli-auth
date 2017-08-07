@@ -77,4 +77,4 @@ exports.awaitForToken = (options) ->
 		app.use (request, response) ->
 			response.status(404).send('Not found')
 			server.close()
-			return reject(new Error('No token'))
+			return reject(new Error('Unknown path or verb'))

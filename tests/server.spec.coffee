@@ -19,7 +19,7 @@ describe 'Server:', ->
 
 	it 'should get 404 if posting to an unknown path', (done) ->
 		promise = server.awaitForToken(options)
-		m.chai.expect(promise).to.be.rejectedWith('No token')
+		m.chai.expect(promise).to.be.rejectedWith('Unknown path or verb')
 
 		request.post "http://localhost:#{options.port}/foobarbaz",
 			form:
@@ -32,7 +32,7 @@ describe 'Server:', ->
 
 	it 'should get 404 if not using the correct verb', (done) ->
 		promise = server.awaitForToken(options)
-		m.chai.expect(promise).to.be.rejectedWith('No token')
+		m.chai.expect(promise).to.be.rejectedWith('Unknown path or verb')
 
 		request.get "http://localhost:#{options.port}#{options.path}",
 			form:
