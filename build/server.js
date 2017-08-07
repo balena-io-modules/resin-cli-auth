@@ -144,7 +144,6 @@ exports.runDevServer = function(_arg) {
   }), app = _ref.app, server = _ref.server;
   app.get('/success', function(req, res) {
     return getContext('success').then(function(context) {
-      console.log(context);
       return res.render('success', context);
     });
   });
