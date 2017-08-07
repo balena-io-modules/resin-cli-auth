@@ -3,6 +3,7 @@ request = require('request')
 Promise = require('bluebird')
 path = require('path')
 fs = require('fs')
+ejs = require('ejs')
 server = require('../build/server')
 utils = require('../build/utils')
 tokens = require('./tokens.json')
@@ -11,9 +12,11 @@ options =
 	port: 3000
 	path: '/auth'
 
-getPage = (name) ->
-	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
-	return fs.readFileSync(pagePath, encoding: 'utf8')
+getPage = (name, context = {}) ->
+	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.ejs")
+	tpl = fs.readFileSync(pagePath, encoding: 'utf8')
+	compiledTpl = ejs.compile(tpl)
+	return compiledTpl(context)
 
 describe 'Server:', ->
 

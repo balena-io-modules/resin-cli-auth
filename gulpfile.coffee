@@ -14,7 +14,7 @@ OPTIONS =
 		coffee: [ 'lib/**/*.coffee', 'tests/**/*.spec.coffee', 'gulpfile.coffee' ]
 		app: 'lib/**/*.coffee'
 		tests: 'tests/**/*.spec.coffee'
-		pages: 'lib/pages/*.html'
+		pages: 'lib/pages/*.ejs'
 
 gulp.task 'pages', ->
 	gulp.src(OPTIONS.files.pages)

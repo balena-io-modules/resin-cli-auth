@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, bodyParser, express, getPagePath, path, utils;
+var Promise, bodyParser, createServer, express, path, utils;
 
 express = require('express');
 
@@ -26,8 +26,23 @@ Promise = require('bluebird');
 
 utils = require('./utils');
 
-getPagePath = function(name) {
-  return path.join(__dirname, 'pages', "" + name + ".html");
+createServer = function(_arg) {
+  var app, isDev, port, server, _ref;
+  _ref = _arg != null ? _arg : {}, port = _ref.port, isDev = _ref.isDev;
+  app = express();
+  app.use(bodyParser.urlencoded({
+    extended: true
+  }));
+  app.set('view engine', 'ejs');
+  app.set('views', path.join(__dirname, 'pages'));
+  if (isDev) {
+    app.use(express["static"](path.join(__dirname, 'pages', 'static')));
+  }
+  server = app.listen(port);
+  return {
+    app: app,
+    server: server
+  };
 };
 
 
@@ -49,26 +64,24 @@ getPagePath = function(name) {
  */
 
 exports.awaitForToken = function(options) {
-  var app, server;
-  app = express();
-  app.use(bodyParser.urlencoded({
-    extended: true
-  }));
-  server = app.listen(options.port);
+  var app, server, _ref;
+  _ref = createServer({
+    port: options.port
+  }), app = _ref.app, server = _ref.server;
   return new Promise(function(resolve, reject) {
     var closeServer;
     closeServer = function(errorMessage, successPayload) {
       return server.close(function() {
         if (errorMessage) {
-          return reject(new Error(errorMessage));
-        } else {
-          return resolve(successPayload);
+          reject(new Error(errorMessage));
+          return;
         }
+        return resolve(successPayload);
       });
     };
     app.post(options.path, function(request, response) {
-      var token, _ref;
-      token = (_ref = request.body.token) != null ? _ref.trim() : void 0;
+      var token, _ref1;
+      token = (_ref1 = request.body.token) != null ? _ref1.trim() : void 0;
       return Promise["try"](function() {
         if (!token) {
           throw new Error('No token');
@@ -79,23 +92,33 @@ exports.awaitForToken = function(options) {
           throw new Error('Invalid token');
         }
       }).then(function() {
-        return response.status(200).sendFile(getPagePath('success'), function() {
-          request.connection.destroy();
-          return server.close(function() {
-            return closeServer(null, token);
-          });
-        });
+        response.status(200).render('success');
+        request.connection.destroy();
+        return closeServer(null, token);
       })["catch"](function(error) {
-        return response.status(401).sendFile(getPagePath('error'), function() {
-          request.connection.destroy();
-          return closeServer(error.message);
-        });
+        response.status(401).render('error');
+        request.connection.destroy();
+        return closeServer(error.message);
       });
     });
     return app.use(function(request, response) {
       response.status(404).send('Not found');
-      server.close();
-      return reject(new Error('Unknown path or verb'));
+      return closeServer('Unknown path or verb');
     });
+  });
+};
+
+exports.runDevServer = function(_arg) {
+  var app, port, server, _ref;
+  port = _arg.port;
+  _ref = createServer({
+    port: port,
+    isDev: true
+  }), app = _ref.app, server = _ref.server;
+  app.get('/success', function(req, res) {
+    return res.render('success');
+  });
+  return app.get('/error', function(req, res) {
+    return res.status(401).render('error');
   });
 };

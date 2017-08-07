@@ -20,8 +20,20 @@ bodyParser = require('body-parser')
 Promise = require('bluebird')
 utils = require('./utils')
 
-getPagePath = (name) ->
-	return path.join(__dirname, 'pages', "#{name}.html")
+createServer = ({ port, isDev } = {}) ->
+	app = express()
+	app.use bodyParser.urlencoded
+		extended: true
+
+	app.set('view engine', 'ejs')
+	app.set('views', path.join(__dirname, 'pages'))
+
+	if isDev
+		app.use(express.static(path.join(__dirname, 'pages', 'static')))
+
+	server = app.listen(port)
+
+	return { app, server }
 
 ###*
 # @summary Await for token
@@ -40,19 +52,16 @@ getPagePath = (name) ->
 #   console.log(token)
 ###
 exports.awaitForToken = (options) ->
-	app = express()
-	app.use bodyParser.urlencoded
-		extended: true
-
-	server = app.listen(options.port)
+	{ app, server } = createServer(port: options.port)
 
 	return new Promise (resolve, reject) ->
 		closeServer = (errorMessage, successPayload) ->
 			server.close ->
 				if errorMessage
 					reject(new Error(errorMessage))
-				else
-					resolve(successPayload)
+					return
+
+				resolve(successPayload)
 
 		app.post options.path, (request, response) ->
 			token = request.body.token?.trim()
@@ -60,21 +69,28 @@ exports.awaitForToken = (options) ->
 			Promise.try ->
 				if not token
 					throw new Error('No token')
-				utils.isTokenValid(token)
+				return utils.isTokenValid(token)
 			.tap (isValid) ->
 				if not isValid
 					throw new Error('Invalid token')
 			.then ->
-				return response.status(200).sendFile getPagePath('success'), ->
-					request.connection.destroy()
-					server.close ->
-						closeServer(null, token)
+				response.status(200).render('success')
+				request.connection.destroy()
+				closeServer(null, token)
 			.catch (error) ->
-				response.status(401).sendFile getPagePath('error'), ->
-					request.connection.destroy()
-					closeServer(error.message)
+				response.status(401).render('error')
+				request.connection.destroy()
+				closeServer(error.message)
 
 		app.use (request, response) ->
 			response.status(404).send('Not found')
-			server.close()
-			return reject(new Error('Unknown path or verb'))
+			closeServer('Unknown path or verb')
+
+exports.runDevServer = ({ port }) ->
+	{ app, server } = createServer({ port, isDev: true })
+
+	app.get '/success', (req, res) ->
+		res.render('success')
+
+	app.get '/error', (req, res) ->
+		res.status(401).render('error')
