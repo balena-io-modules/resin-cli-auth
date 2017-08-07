@@ -18,6 +18,7 @@ express = require('express')
 path = require('path')
 bodyParser = require('body-parser')
 Promise = require('bluebird')
+resin = require('resin-sdk-preconfigured')
 utils = require('./utils')
 
 createServer = ({ port, isDev } = {}) ->
@@ -63,6 +64,13 @@ exports.awaitForToken = (options) ->
 
 				resolve(successPayload)
 
+		renderAndDone = ({ request, response, viewName, errorMessage, statusCode, token }) ->
+			return getContext(viewName)
+			.then (context) ->
+				response.status(statusCode || 200).render(viewName, context)
+				request.connection.destroy()
+				closeServer(errorMessage, token)
+
 		app.post options.path, (request, response) ->
 			token = request.body.token?.trim()
 
@@ -74,23 +82,33 @@ exports.awaitForToken = (options) ->
 				if not isValid
 					throw new Error('Invalid token')
 			.then ->
-				response.status(200).render('success')
-				request.connection.destroy()
-				closeServer(null, token)
+				renderAndDone({ request, response, viewName: 'success', token })
 			.catch (error) ->
-				response.status(401).render('error')
-				request.connection.destroy()
-				closeServer(error.message)
+				renderAndDone({
+					request, response, viewName: 'error',
+					statusCode: 401, errorMessage: error.message
+				})
 
 		app.use (request, response) ->
 			response.status(404).send('Not found')
 			closeServer('Unknown path or verb')
 
+exports.getContext = getContext = (viewName) ->
+	if viewName is 'success'
+		return Promise.props
+			dashboardUrl: resin.settings.get('dashboardUrl')
+
+	return Promise.resolve({})
+
 exports.runDevServer = ({ port }) ->
 	{ app, server } = createServer({ port, isDev: true })
 
 	app.get '/success', (req, res) ->
-		res.render('success')
+		getContext('success')
+		.then (context) ->
+			res.render('success', context)
 
 	app.get '/error', (req, res) ->
 		res.status(401).render('error')
+
+	console.log('http://localhost:4000')

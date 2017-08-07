@@ -12,11 +12,13 @@ options =
 	port: 3000
 	path: '/auth'
 
-getPage = (name, context = {}) ->
+getPage = (name) ->
 	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.ejs")
 	tpl = fs.readFileSync(pagePath, encoding: 'utf8')
 	compiledTpl = ejs.compile(tpl)
-	return compiledTpl(context)
+	return server.getContext(name)
+		.then (context) ->
+			compiledTpl(context)
 
 describe 'Server:', ->
 
@@ -65,8 +67,9 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(200)
-				m.chai.expect(body).to.equal(getPage('success'))
-				done()
+				getPage('success').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 	describe 'given the token does not authenticate with the server', ->
 
@@ -87,8 +90,9 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 		it 'should be rejected if no token', (done) ->
 			promise = server.awaitForToken(options)
@@ -100,8 +104,9 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 		it 'should be rejected if token is malformed', (done) ->
 			promise = server.awaitForToken(options)
@@ -113,6 +118,7 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
  */
-var Promise, bodyParser, createServer, express, path, utils;
+var Promise, bodyParser, createServer, express, getContext, path, resin, utils;
 
 express = require('express');
 
@@ -23,6 +23,8 @@ path = require('path');
 bodyParser = require('body-parser');
 
 Promise = require('bluebird');
+
+resin = require('resin-sdk-preconfigured');
 
 utils = require('./utils');
 
@@ -69,7 +71,7 @@ exports.awaitForToken = function(options) {
     port: options.port
   }), app = _ref.app, server = _ref.server;
   return new Promise(function(resolve, reject) {
-    var closeServer;
+    var closeServer, renderAndDone;
     closeServer = function(errorMessage, successPayload) {
       return server.close(function() {
         if (errorMessage) {
@@ -77,6 +79,15 @@ exports.awaitForToken = function(options) {
           return;
         }
         return resolve(successPayload);
+      });
+    };
+    renderAndDone = function(_arg) {
+      var errorMessage, request, response, statusCode, token, viewName;
+      request = _arg.request, response = _arg.response, viewName = _arg.viewName, errorMessage = _arg.errorMessage, statusCode = _arg.statusCode, token = _arg.token;
+      return getContext(viewName).then(function(context) {
+        response.status(statusCode || 200).render(viewName, context);
+        request.connection.destroy();
+        return closeServer(errorMessage, token);
       });
     };
     app.post(options.path, function(request, response) {
@@ -92,13 +103,20 @@ exports.awaitForToken = function(options) {
           throw new Error('Invalid token');
         }
       }).then(function() {
-        response.status(200).render('success');
-        request.connection.destroy();
-        return closeServer(null, token);
+        return renderAndDone({
+          request: request,
+          response: response,
+          viewName: 'success',
+          token: token
+        });
       })["catch"](function(error) {
-        response.status(401).render('error');
-        request.connection.destroy();
-        return closeServer(error.message);
+        return renderAndDone({
+          request: request,
+          response: response,
+          viewName: 'error',
+          statusCode: 401,
+          errorMessage: error.message
+        });
       });
     });
     return app.use(function(request, response) {
@@ -106,6 +124,15 @@ exports.awaitForToken = function(options) {
       return closeServer('Unknown path or verb');
     });
   });
+};
+
+exports.getContext = getContext = function(viewName) {
+  if (viewName === 'success') {
+    return Promise.props({
+      dashboardUrl: resin.settings.get('dashboardUrl')
+    });
+  }
+  return Promise.resolve({});
 };
 
 exports.runDevServer = function(_arg) {
@@ -116,9 +143,13 @@ exports.runDevServer = function(_arg) {
     isDev: true
   }), app = _ref.app, server = _ref.server;
   app.get('/success', function(req, res) {
-    return res.render('success');
+    return getContext('success').then(function(context) {
+      console.log(context);
+      return res.render('success', context);
+    });
   });
-  return app.get('/error', function(req, res) {
+  app.get('/error', function(req, res) {
     return res.status(401).render('error');
   });
+  return console.log('http://localhost:4000');
 };

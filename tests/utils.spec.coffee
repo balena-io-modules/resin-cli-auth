@@ -17,20 +17,31 @@ describe 'Utils:', ->
 			.nodeify(done)
 
 		it 'should eventually contain an https protocol', (done) ->
-			utils.getDashboardLoginURL('https://localhost:3000/callback').then (loginUrl) ->
+			Promise.props
+				dashboardUrl: resin.settings.get('dashboardUrl')
+				loginUrl: utils.getDashboardLoginURL('https://localhost:3000/callback')
+			.then ({ dashboardUrl, loginUrl }) ->
 				protocol = url.parse(loginUrl).protocol
-				m.chai.expect(protocol).to.equal('https:')
+				m.chai.expect(protocol).to.equal(url.parse(dashboardUrl).protocol)
 			.nodeify(done)
 
-		it 'should correctly escape a callback url without a path', ->
-			promise = utils.getDashboardLoginURL('http://localhost:3000')
-			expectedUrl = 'https://dashboard.resin.io/login/cli/http%253A%252F%252Flocalhost%253A3000'
-			m.chai.expect(promise).to.eventually.equal(expectedUrl)
+		it 'should correctly escape a callback url without a path', (done) ->
+			Promise.props
+				dashboardUrl: resin.settings.get('dashboardUrl')
+				loginUrl: utils.getDashboardLoginURL('http://localhost:3000')
+			.then ({ dashboardUrl, loginUrl }) ->
+				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252Flocalhost%253A3000"
+				m.chai.expect(loginUrl).to.equal(expectedUrl)
+			.nodeify(done)
 
-		it 'should correctly escape a callback url with a path', ->
-			promise = utils.getDashboardLoginURL('http://localhost:3000/callback')
-			expectedUrl = 'https://dashboard.resin.io/login/cli/http%253A%252F%252Flocalhost%253A3000%252Fcallback'
-			m.chai.expect(promise).to.eventually.equal(expectedUrl)
+		it 'should correctly escape a callback url with a path', (done) ->
+			Promise.props
+				dashboardUrl: resin.settings.get('dashboardUrl')
+				loginUrl: utils.getDashboardLoginURL('http://localhost:3000/callback')
+			.then ({ dashboardUrl, loginUrl }) ->
+				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252Flocalhost%253A3000%252Fcallback"
+				m.chai.expect(loginUrl).to.equal(expectedUrl)
+			.nodeify(done)
 
 	describe '.isTokenValid()', ->
 
