@@ -3,8 +3,8 @@ request = require('request')
 Promise = require('bluebird')
 path = require('path')
 fs = require('fs')
-server = require('../lib/server')
-utils = require('../lib/utils')
+server = require('../build/server')
+utils = require('../build/utils')
 tokens = require('./tokens.json')
 
 options =

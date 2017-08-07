@@ -18,7 +18,8 @@
   },
   "scripts": {
     "test": "gulp test",
-    "prepublish": "gulp build",
+    "build": "rimraf build && gulp build",
+    "prepublish": "npm run build",
     "readme": "jsdoc2md --template doc/README.hbs build/auth.js > README.md"
   },
   "author": "Juan Cruz Viotti <juan@resin.io>",
@@ -35,7 +36,8 @@
     "jsdoc-to-markdown": "^1.1.1",
     "mocha": "~2.0.1",
     "mochainon": "^1.0.0",
-    "request": "^2.66.0"
+    "request": "^2.66.0",
+    "rimraf": "^2.6.1"
   },
   "dependencies": {
     "bluebird": "^3.0.5",

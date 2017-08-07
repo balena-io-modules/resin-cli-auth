@@ -2,7 +2,7 @@ m = require('mochainon')
 url = require('url')
 Promise = require('bluebird')
 resin = require('resin-sdk-preconfigured')
-utils = require('../lib/utils')
+utils = require('../build/utils')
 tokens = require('./tokens.json')
 
 describe 'Utils:', ->

@@ -27,7 +27,7 @@ Promise = require('bluebird');
 utils = require('./utils');
 
 getPagePath = function(name) {
-  return path.join(__dirname, '..', 'build', 'pages', "" + name + ".html");
+  return path.join(__dirname, 'pages', "" + name + ".html");
 };
 
 

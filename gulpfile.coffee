@@ -14,7 +14,7 @@ OPTIONS =
 		coffee: [ 'lib/**/*.coffee', 'tests/**/*.spec.coffee', 'gulpfile.coffee' ]
 		app: 'lib/**/*.coffee'
 		tests: 'tests/**/*.spec.coffee'
-		pages: 'pages/*.html'
+		pages: 'lib/pages/*.html'
 
 gulp.task 'pages', ->
 	gulp.src(OPTIONS.files.pages)
@@ -40,10 +40,9 @@ gulp.task 'lint', ->
 		.pipe(coffeelint.reporter())
 
 gulp.task 'build', (callback) ->
-	runSequence 'pages', [
+	runSequence 'pages', 'coffee', [
 		'lint'
 		'test'
-		'coffee'
 	], callback
 
 gulp.task 'watch', [ 'build' ], ->
