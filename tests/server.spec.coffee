@@ -76,7 +76,7 @@ describe 'Server:', ->
 
 		it 'should be rejected', (done) ->
 			promise = server.awaitForToken(options)
-			m.chai.expect(promise).to.be.rejectedWith('No token')
+			m.chai.expect(promise).to.be.rejectedWith('Invalid token')
 
 			request.post "http://localhost:#{options.port}#{options.path}",
 				form:
@@ -102,7 +102,7 @@ describe 'Server:', ->
 
 		it 'should be rejected if token is malformed', (done) ->
 			promise = server.awaitForToken(options)
-			m.chai.expect(promise).to.be.rejectedWith('No token')
+			m.chai.expect(promise).to.be.rejectedWith('Invalid token')
 
 			request.post "http://localhost:#{options.port}#{options.path}",
 				form:

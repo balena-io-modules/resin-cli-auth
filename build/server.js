@@ -56,25 +56,39 @@ exports.awaitForToken = function(options) {
   }));
   server = app.listen(options.port);
   return new Promise(function(resolve, reject) {
-    app.post(options.path, function(request, response) {
-      var token;
-      token = request.body.token;
-      return utils.isTokenValid(token).then(function(isValid) {
-        if (isValid) {
-          return response.status(200).sendFile(getPagePath('success'), function() {
-            request.connection.destroy();
-            return server.close(function() {
-              return resolve(token);
-            });
-          });
+    var closeServer;
+    closeServer = function(errorMessage, successPayload) {
+      return server.close(function() {
+        if (errorMessage) {
+          return reject(new Error(errorMessage));
+        } else {
+          return resolve(successPayload);
         }
-        throw new Error('No token');
+      });
+    };
+    app.post(options.path, function(request, response) {
+      var token, _ref;
+      token = (_ref = request.body.token) != null ? _ref.trim() : void 0;
+      return Promise["try"](function() {
+        if (!token) {
+          throw new Error('No token');
+        }
+        return utils.isTokenValid(token);
+      }).tap(function(isValid) {
+        if (!isValid) {
+          throw new Error('Invalid token');
+        }
+      }).then(function() {
+        return response.status(200).sendFile(getPagePath('success'), function() {
+          request.connection.destroy();
+          return server.close(function() {
+            return closeServer(null, token);
+          });
+        });
       })["catch"](function(error) {
         return response.status(401).sendFile(getPagePath('error'), function() {
           request.connection.destroy();
-          return server.close(function() {
-            return reject(new Error(error.message));
-          });
+          return closeServer(error.message);
         });
       });
     });

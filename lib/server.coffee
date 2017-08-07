@@ -47,23 +47,32 @@ exports.awaitForToken = (options) ->
 	server = app.listen(options.port)
 
 	return new Promise (resolve, reject) ->
+		closeServer = (errorMessage, successPayload) ->
+			server.close ->
+				if errorMessage
+					reject(new Error(errorMessage))
+				else
+					resolve(successPayload)
+
 		app.post options.path, (request, response) ->
-			token = request.body.token
+			token = request.body.token?.trim()
 
-			utils.isTokenValid(token)
-			.then (isValid) ->
-				if isValid
-					return response.status(200).sendFile getPagePath('success'), ->
-						request.connection.destroy()
-						server.close ->
-							return resolve(token)
-
-				throw new Error('No token')
+			Promise.try ->
+				if not token
+					throw new Error('No token')
+				utils.isTokenValid(token)
+			.tap (isValid) ->
+				if not isValid
+					throw new Error('Invalid token')
+			.then ->
+				return response.status(200).sendFile getPagePath('success'), ->
+					request.connection.destroy()
+					server.close ->
+						closeServer(null, token)
 			.catch (error) ->
 				response.status(401).sendFile getPagePath('error'), ->
 					request.connection.destroy()
-					server.close ->
-						return reject(new Error(error.message))
+					closeServer(error.message)
 
 		app.use (request, response) ->
 			response.status(404).send('Not found')
