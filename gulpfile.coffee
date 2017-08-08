@@ -14,7 +14,7 @@ OPTIONS =
 		coffee: [ 'lib/**/*.coffee', 'tests/**/*.spec.coffee', 'gulpfile.coffee' ]
 		app: 'lib/**/*.coffee'
 		tests: 'tests/**/*.spec.coffee'
-		pages: 'pages/*.html'
+		pages: 'lib/pages/*.ejs'
 
 gulp.task 'pages', ->
 	gulp.src(OPTIONS.files.pages)
@@ -23,7 +23,7 @@ gulp.task 'pages', ->
 
 gulp.task 'coffee', ->
 	gulp.src(OPTIONS.files.app)
-		.pipe(coffee(bare: true)).on('error', gutil.log)
+		.pipe(coffee(bare: true, header: true)).on('error', gutil.log)
 		.pipe(gulp.dest('build/'))
 
 gulp.task 'test', ->
@@ -40,10 +40,9 @@ gulp.task 'lint', ->
 		.pipe(coffeelint.reporter())
 
 gulp.task 'build', (callback) ->
-	runSequence 'pages', [
+	runSequence 'pages', 'coffee', [
 		'lint'
 		'test'
-		'coffee'
 	], callback
 
 gulp.task 'watch', [ 'build' ], ->

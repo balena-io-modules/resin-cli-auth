@@ -3,8 +3,9 @@ request = require('request')
 Promise = require('bluebird')
 path = require('path')
 fs = require('fs')
-server = require('../lib/server')
-utils = require('../lib/utils')
+ejs = require('ejs')
+server = require('../build/server')
+utils = require('../build/utils')
 tokens = require('./tokens.json')
 
 options =
@@ -12,14 +13,18 @@ options =
 	path: '/auth'
 
 getPage = (name) ->
-	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.html")
-	return fs.readFileSync(pagePath, encoding: 'utf8')
+	pagePath = path.join(__dirname, '..', 'build', 'pages', "#{name}.ejs")
+	tpl = fs.readFileSync(pagePath, encoding: 'utf8')
+	compiledTpl = ejs.compile(tpl)
+	return server.getContext(name)
+		.then (context) ->
+			compiledTpl(context)
 
 describe 'Server:', ->
 
 	it 'should get 404 if posting to an unknown path', (done) ->
 		promise = server.awaitForToken(options)
-		m.chai.expect(promise).to.be.rejectedWith('No token')
+		m.chai.expect(promise).to.be.rejectedWith('Unknown path or verb')
 
 		request.post "http://localhost:#{options.port}/foobarbaz",
 			form:
@@ -32,7 +37,7 @@ describe 'Server:', ->
 
 	it 'should get 404 if not using the correct verb', (done) ->
 		promise = server.awaitForToken(options)
-		m.chai.expect(promise).to.be.rejectedWith('No token')
+		m.chai.expect(promise).to.be.rejectedWith('Unknown path or verb')
 
 		request.get "http://localhost:#{options.port}#{options.path}",
 			form:
@@ -62,8 +67,9 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(200)
-				m.chai.expect(body).to.equal(getPage('success'))
-				done()
+				getPage('success').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 	describe 'given the token does not authenticate with the server', ->
 
@@ -76,7 +82,7 @@ describe 'Server:', ->
 
 		it 'should be rejected', (done) ->
 			promise = server.awaitForToken(options)
-			m.chai.expect(promise).to.be.rejectedWith('No token')
+			m.chai.expect(promise).to.be.rejectedWith('Invalid token')
 
 			request.post "http://localhost:#{options.port}#{options.path}",
 				form:
@@ -84,8 +90,9 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 		it 'should be rejected if no token', (done) ->
 			promise = server.awaitForToken(options)
@@ -97,12 +104,13 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
 		it 'should be rejected if token is malformed', (done) ->
 			promise = server.awaitForToken(options)
-			m.chai.expect(promise).to.be.rejectedWith('No token')
+			m.chai.expect(promise).to.be.rejectedWith('Invalid token')
 
 			request.post "http://localhost:#{options.port}#{options.path}",
 				form:
@@ -110,6 +118,7 @@ describe 'Server:', ->
 			, (error, response, body) ->
 				m.chai.expect(error).to.not.exist
 				m.chai.expect(response.statusCode).to.equal(401)
-				m.chai.expect(body).to.equal(getPage('error'))
-				done()
+				getPage('error').then (expectedBody) ->
+					m.chai.expect(body).to.equal(expectedBody)
+					done()
 
