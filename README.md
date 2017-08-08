@@ -32,6 +32,7 @@ Documentation
 -------------
 
 <a name="module_auth.login"></a>
+
 ### auth.login() ⇒ <code>Promise</code>
 This function opens the user's default browser and points it
 to the Resin.io dashboard where the session token exchange will
