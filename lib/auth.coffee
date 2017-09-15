@@ -48,7 +48,9 @@ exports.login = ->
 		port: 8989
 		path: '/auth'
 
-	callbackUrl = "http://localhost:#{options.port}#{options.path}"
+	# Needs to be 127.0.0.1 not localhost, because the ip only is whitelisted
+	# from mixed content warnings (as the target of a form in the result page)
+	callbackUrl = "http://127.0.0.1:#{options.port}#{options.path}"
 	return utils.getDashboardLoginURL(callbackUrl).then (loginUrl) ->
 
 		# Leave a bit of time for the

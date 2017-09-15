@@ -111,4 +111,4 @@ exports.runDevServer = ({ port }) ->
 	app.get '/error', (req, res) ->
 		res.status(401).render('error')
 
-	console.log('http://localhost:4000')
+	console.log('http://127.0.0.1:4000')

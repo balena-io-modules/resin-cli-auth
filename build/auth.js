@@ -57,7 +57,7 @@ exports.login = function() {
     port: 8989,
     path: '/auth'
   };
-  callbackUrl = "http://localhost:" + options.port + options.path;
+  callbackUrl = "http://127.0.0.1:" + options.port + options.path;
   return utils.getDashboardLoginURL(callbackUrl).then(function(loginUrl) {
     setTimeout(function() {
       return open(loginUrl);

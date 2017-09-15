@@ -10,7 +10,7 @@ describe 'Utils:', ->
 	describe '.getDashboardLoginURL()', ->
 
 		it 'should eventually be a valid url', (done) ->
-			utils.getDashboardLoginURL('https://localhost:3000/callback').then (loginUrl) ->
+			utils.getDashboardLoginURL('https://127.0.0.1:3000/callback').then (loginUrl) ->
 				m.chai.expect ->
 					url.parse(loginUrl)
 				.to.not.throw(Error)
@@ -19,7 +19,7 @@ describe 'Utils:', ->
 		it 'should eventually contain an https protocol', (done) ->
 			Promise.props
 				dashboardUrl: resin.settings.get('dashboardUrl')
-				loginUrl: utils.getDashboardLoginURL('https://localhost:3000/callback')
+				loginUrl: utils.getDashboardLoginURL('https://127.0.0.1:3000/callback')
 			.then ({ dashboardUrl, loginUrl }) ->
 				protocol = url.parse(loginUrl).protocol
 				m.chai.expect(protocol).to.equal(url.parse(dashboardUrl).protocol)
@@ -28,18 +28,18 @@ describe 'Utils:', ->
 		it 'should correctly escape a callback url without a path', (done) ->
 			Promise.props
 				dashboardUrl: resin.settings.get('dashboardUrl')
-				loginUrl: utils.getDashboardLoginURL('http://localhost:3000')
+				loginUrl: utils.getDashboardLoginURL('http://127.0.0.1:3000')
 			.then ({ dashboardUrl, loginUrl }) ->
-				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252Flocalhost%253A3000"
+				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252F127.0.0.1%253A3000"
 				m.chai.expect(loginUrl).to.equal(expectedUrl)
 			.nodeify(done)
 
 		it 'should correctly escape a callback url with a path', (done) ->
 			Promise.props
 				dashboardUrl: resin.settings.get('dashboardUrl')
-				loginUrl: utils.getDashboardLoginURL('http://localhost:3000/callback')
+				loginUrl: utils.getDashboardLoginURL('http://127.0.0.1:3000/callback')
 			.then ({ dashboardUrl, loginUrl }) ->
-				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252Flocalhost%253A3000%252Fcallback"
+				expectedUrl = "#{dashboardUrl}/login/cli/http%253A%252F%252F127.0.0.1%253A3000%252Fcallback"
 				m.chai.expect(loginUrl).to.equal(expectedUrl)
 			.nodeify(done)
 
