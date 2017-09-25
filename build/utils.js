@@ -38,7 +38,7 @@ Promise = require('bluebird');
  * @returns {Promise}
  *
  * @example
- * utils.getDashboardLoginURL('http://localhost:3000').then (url) ->
+ * utils.getDashboardLoginURL('http://127.0.0.1:3000').then (url) ->
  * 	console.log(url)
  */
 

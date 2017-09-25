@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+
+- Use 127.0.0.1 as the login URL to avoid mixed content warnings in FF
+
 ## [1.2.0] - 2017-08-08
 
 - Show the dashboard URL specific to the environment (resin production / staging / other) used for authentication
