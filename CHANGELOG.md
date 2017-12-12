@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.2] - 2017-12-12
+
 - Deprecate project, as it has been moved into the CLI itself
 
 ## [1.2.1] - 2017-09-25
@@ -42,6 +44,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 - Omit tests from NPM package.
 
+[1.2.2]: https://github.com/resin-io/resin-cli-auth/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/resin-io/resin-cli-auth/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/resin-io/resin-cli-auth/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/resin-io/resin-cli-auth/compare/v1.1.2...v1.1.3
