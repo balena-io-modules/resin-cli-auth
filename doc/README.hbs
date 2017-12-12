@@ -10,6 +10,11 @@ Join our online chat at [![Gitter chat](https://badges.gitter.im/resin-io/chat.p
 
 Resin.io CLI authentication handler.
 
+This package is now deprecated
+====
+
+Resin-cli-auth is now built into [Resin CLI](https://github.com/resin-io/resin-cli) itself, so this package is not maintained, and should not be used.
+
 Role
 ----
 
